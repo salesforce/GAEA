@@ -1,11 +1,12 @@
 # GAEA: Graph Augmentation for Equitable Access via Reinforcement Learning
 
 This repository contains the data and code for [Salesforce Research](https://einstein.ai) paper: [GAEA: Graph Augmentation for Equitable Access via Reinforcement Learning
-](https://arxiv.org/abs/2012.03900
+](https://arxiv.org/abs/2012.03900)
 
 ## Citation
 If you use this code, data or our results in your research, please cite as appropriate:
 
+```
 @misc{ramachandran2020gaea,
       title={GAEA: Graph Augmentation for Equitable Access via Reinforcement Learning}, 
       author={Govardana Sachithanandam Ramachandran and Ivan Brugere and Lav R. Varshney and Caiming Xiong},
@@ -14,6 +15,7 @@ If you use this code, data or our results in your research, please cite as appro
       archivePrefix={arXiv},
       primaryClass={cs.LG}
 }
+```
 
 ## Prerequisites
 
@@ -70,6 +72,7 @@ On each of the outputted graphs, we run monte carlo weighted walk simulations an
 
 ### Graph editing on synthetic network
 ```python run_experiments.py --exp edit --graph fb --school Caltech36```
+
 Other school network we tried are: Mich67 and Reed98 
 
 ### Facility Placement
