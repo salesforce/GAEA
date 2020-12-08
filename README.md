@@ -64,16 +64,16 @@ On each of the outputted graphs, we run monte carlo weighted walk simulations an
 1. Expected Utility
 2. Gini Index of Expected Utility
 
-```python run_experiments.py --exp edit --graph chicago```
 ### Graph editing on Chicago school network
+```python run_experiments.py --exp edit --graph chicago```
 
 ### Graph editing on Facebook100 schools
-```python run_experiments.py --exp edit --graph chicago```
-
-### Graph editing on synthetic network
 ```python run_experiments.py --exp edit --graph fb --school Caltech36```
 
 Other school network we tried are: Mich67 and Reed98 
+
+### Graph editing on synthetic network
+```python run_experiments.py --exp edit --graph synthetic```
 
 ### Facility Placement
 ```python run_experiments.py --exp facility_placement --graph chicago```
