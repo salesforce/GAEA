@@ -158,14 +158,6 @@ class ParameterSchedule(Callback):
                 fairlosses = 2 * K.get_value(self.fair_loss_mu) * fairlosses
                 
                 K.set_value(self.fair_loss_lambda, (K.get_value(self.fair_loss_lambda) + fairlosses)/2)
-                #K.set_value(self.fair_loss_lambda, (K.get_value(self.fair_loss_lambda) + fairlosses)/2)
-                #if self.batch_act % 2==0:
-                #self.fair_loss_lambda_value = self.fair_loss_lambda_value + fairlosses
-                #K.set_value(self.fair_loss_lambda, self.fair_loss_lambda_value)
-                #else:
-                #K.set_value(self.fair_loss_lambda, 0)
-                
-                
             
             if self.epoch_act>self.constraint_epoch_start_schedule[1]:
                 # Learning proxy lagrangian for edit loss
@@ -173,11 +165,6 @@ class ParameterSchedule(Callback):
                 edit_loss = 2 * K.get_value(self.edit_loss_mu) * np.mean(np.sum(Es, axis=(1,)) - self.budget)
                 
                 K.set_value(self.edit_loss_lambda, (K.get_value(self.edit_loss_lambda) + self.config['lagrangian_lamdba_growth'] * edit_loss))
-                #if self.batch_act % 2!=0:
-                #self.fair_loss_lambda_value = self.edit_loss_lambda_value + edit_loss
-                #K.set_value(self.edit_loss_lambda, self.edit_loss_lambda_value)
-                #else:
-                #K.set_value(self.edit_loss_lambda, 0)
                 
         if self.epoch_act>self.constraint_epoch_start_schedule[2]:
             self.temp *= self.temp_decay_factor
@@ -323,17 +310,11 @@ class FlowGraphEditRL():
         self.model_graph_edit_train, self.model_graph_edit_predict = self.graph_edit_fn(**self.graph_edit_params)
         self.states_fn(**self.states_params)
 
-    # def significance(self, args):
-    #     ret_orig = graph_inc.evaluate_model_stat_test(gs =self.net_gs, starts=self.locs, rewards=self.immunized_ids, **args)
-    #     ret = graph_inc.evaluate_model_stat_test(g_r=self.net_r_trained, g_b=self.net_b_trained, starts_r=self.loc_r, starts_b=self.loc_b, rewards=self.immunized_ids, **args)
-    #     return ret_orig, ret
     def significance_replicates(self, args={}, state=None, nets=None):
         if not nets:
             nets = self.net_gs
         if state=="edit":
             nets = self.net_gs_trained
-#            net_r = self.net_r_trained
-#            net_b = self.net_b_trained
         return graph_inc.evaluate_model_stat_replicates(nets, rewards=self.immunized_ids, fn_replicates=self.particle_fn, params_replicates=self.particle_mc_params, **args)
     def init_states_basic(self, epochs=None):
         if epochs is None:
@@ -344,11 +325,6 @@ class FlowGraphEditRL():
             _, dense_g = self.get_flow_model(self.net_gs[i])
             self.dense_gs.append(dense_g)
             
-        #self.model_net_r.fit(np.array(self.states * self.batch_size_state), np.array(self.net_r * self.batch_size_state), epochs=epochs, verbose=1)
-        #self.model_net_b.fit(np.array(self.states * self.batch_size_state), np.array(self.net_b * self.batch_size_state), epochs=epochs, verbose=1)
-#         self.model_net_r.predict(np.array(self.states))
-#         self.model_net_r.predict(np.array(self.states))
-
     def value_iteration(self,P,R,T,gamma=0.9,epochs=5):
         V = np.zeros((T,self.num_states))
         for _ in range(epochs):
@@ -407,15 +383,7 @@ class FlowGraphEditRL():
 
             if self.param_schedule.epoch_act>self.constraint_epoch_start_schedule[2]:
                 temp *= self.temp_decay_factor
-                #K.set_value(self.temp_var, temp)
-#             print('temp:',temp)
-#             print('temp:',temp.shape)
-#             print('self.temp_var:',self.temp_var)
-            #K.set_value(self.temp_var, temp)
             i+=1
-#             if i%100 == 0:
-#                 print('\n-------\nT_T temp:',temp,'\n-------')
-#                 
             yield (state_gs,Y)
             
 
@@ -443,20 +411,7 @@ class FlowGraphEditRL():
             E, Prs = self.model_graph_edit_predict.predict([s0_sub for _ in range(self.num_groups)])
             
             break
-#             
-#             for gg in range(self.num_groups):
-#                 print('V_{}:{}'.format(gg,np.mean(Prs[0][:,gg])))
-#             
-#             # ### State transitions of Red particle Before Vs After
-#             #Pr
-#             for j in range(self.num_groups):
-#                 net_g_updated_partials[j].append(Prs[2+j])
-            #np.round(self.model_graph_edit.predict([S0_rs, S0_bs, Rs, temp])[2][:self.num_states - 1], 2)
         print('E',E[0].shape)
-#         
-#         n_gs_updated = []
-#         for i in range(self.num_groups):
-#             n_gs_updated.append(np.concatenate(net_g_updated_partials[i]).tolist())
 
         # ### Positions of edits (red folloed by black)
         #np.round(self.model_graph_edit.predict([S0_rs, S0_bs, Rs, temp])[1][:1], 0)
@@ -583,8 +538,6 @@ class FlowGraphEditRL():
         years_clean = [x for x,y in zip(*np.unique(years, return_counts=True)) if y > len(years)*.1 and x != 0]
         inds = [v for v in np.where(np.bitwise_and(d["local_info"][:, 1] == pop_key, d["local_info"][:, 5]==np.max(years_clean)))[0] if v not in self.immunized_ids]
         return npr.choice(inds, min(particles, len(inds)), replace=False)
-        #inds_select = list(npr.permutation(inds)[0:min(len(inds), particles) int(np.floor(len(inds) * particle_frac))])
-        #return inds_select
 
     def init_node_states(self):
         return np.eye(self.N, dtype=int).tolist()
@@ -863,26 +816,11 @@ class FlowGraphEditRL():
             variance = (K.sum(var_group_utilites)/N)**0.5
             fair_loss = fair_loss/variance
         
-#         fairlosses = []
-#         for group_utility in group_utilities:
-#             fairlosses.append(K.abs(group_utility - mean_group_utilites)**self.fair_loss_p)
         print('^_^ fair_loss:',K.int_shape(fair_loss))
-            
-#         if self.fair_loss_normalize_variance:
-#             variance = (K.sum(group_utility_variances,axis=-1)/N)**0.5
-#             fair_loss = fair_loss/variance
             
         return K.sum(fair_loss)
     
     def fair_loss(self, y_true, y_pred):
-        #fair_loss = K.sum(K.abs(y_pred - K.mean(y_pred,axis=-1,keepdims=True)),axis=-1)
-        
-#         print(('fair, y_pred:',y_pred))
-#         mean_vg = K.mean(y_pred,axis=-1,keepdims=True)
-#         fair_loss = K.sum(K.abs(mean_vg - y_pred))
-# 
-#         print('^_^ fair_loss:',K.int_shape(fair_loss))
-#         return fair_loss
         v = y_pred
         vgs = K.mean(v,axis=-2)
         vg_mean = K.mean(vgs,axis=-1)
