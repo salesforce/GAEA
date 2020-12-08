@@ -1,0 +1,65 @@
+GEO.id,Id
+GEO.id2,Id2
+GEO.display-label,Geography
+HD01_S01,Number; RACE - Total population
+HD02_S01,Percent; RACE - Total population
+HD01_S02,Number; RACE - Total population - One race
+HD02_S02,Percent; RACE - Total population - One race
+HD01_S03,Number; RACE - Total population - One race - White
+HD02_S03,Percent; RACE - Total population - One race - White
+HD01_S04,Number; RACE - Total population - One race - Black or African American
+HD02_S04,Percent; RACE - Total population - One race - Black or African American
+HD01_S05,Number; RACE - Total population - One race - American Indian and Alaska Native
+HD02_S05,Percent; RACE - Total population - One race - American Indian and Alaska Native
+HD01_S06,"Number; RACE - Total population - One race - American Indian and Alaska Native - American Indian, specified [1]"
+HD02_S06,"Percent; RACE - Total population - One race - American Indian and Alaska Native - American Indian, specified [1]"
+HD01_S07,"Number; RACE - Total population - One race - American Indian and Alaska Native - Alaska Native, specified [1]"
+HD02_S07,"Percent; RACE - Total population - One race - American Indian and Alaska Native - Alaska Native, specified [1]"
+HD01_S08,"Number; RACE - Total population - One race - American Indian and Alaska Native - Both American Indian and Alaska Native, specified [1]"
+HD02_S08,"Percent; RACE - Total population - One race - American Indian and Alaska Native - Both American Indian and Alaska Native, specified [1]"
+HD01_S09,"Number; RACE - Total population - One race - American Indian and Alaska Native - American Indian or Alaska Native, not specified"
+HD02_S09,"Percent; RACE - Total population - One race - American Indian and Alaska Native - American Indian or Alaska Native, not specified"
+HD01_S10,Number; RACE - Total population - One race - Asian
+HD02_S10,Percent; RACE - Total population - One race - Asian
+HD01_S18,Number; RACE - Total population - One race - Native Hawaiian and Other Pacific Islander
+HD02_S18,Percent; RACE - Total population - One race - Native Hawaiian and Other Pacific Islander
+HD01_S23,Number; RACE - Total population - One race - Some Other Race
+HD02_S23,Percent; RACE - Total population - One race - Some Other Race
+HD01_S24,Number; RACE - Total population - Two or More Races
+HD02_S24,Percent; RACE - Total population - Two or More Races
+HD01_S25,Number; RACE - Total population - Two or More Races - Two races with Some Other Race
+HD02_S25,Percent; RACE - Total population - Two or More Races - Two races with Some Other Race
+HD01_S26,Number; RACE - Total population - Two or More Races - Two races without Some Other Race
+HD02_S26,Percent; RACE - Total population - Two or More Races - Two races without Some Other Race
+HD01_S27,Number; RACE - Total population - Two or More Races - Three or more races with Some Other Race
+HD02_S27,Percent; RACE - Total population - Two or More Races - Three or more races with Some Other Race
+HD01_S28,Number; RACE - Total population - Two or More Races - Three or more races without Some Other Race
+HD02_S28,Percent; RACE - Total population - Two or More Races - Three or more races without Some Other Race
+HD01_S29,Number; HISPANIC OR LATINO - Total population
+HD02_S29,Percent; HISPANIC OR LATINO - Total population
+HD01_S30,Number; HISPANIC OR LATINO - Total population - Hispanic or Latino (of any race)
+HD02_S30,Percent; HISPANIC OR LATINO - Total population - Hispanic or Latino (of any race)
+HD01_S31,Number; HISPANIC OR LATINO - Total population - Hispanic or Latino (of any race) - Mexican
+HD02_S31,Percent; HISPANIC OR LATINO - Total population - Hispanic or Latino (of any race) - Mexican
+HD01_S32,Number; HISPANIC OR LATINO - Total population - Hispanic or Latino (of any race) - Puerto Rican
+HD02_S32,Percent; HISPANIC OR LATINO - Total population - Hispanic or Latino (of any race) - Puerto Rican
+HD01_S33,Number; HISPANIC OR LATINO - Total population - Hispanic or Latino (of any race) - Cuban
+HD02_S33,Percent; HISPANIC OR LATINO - Total population - Hispanic or Latino (of any race) - Cuban
+HD01_S34,Number; HISPANIC OR LATINO - Total population - Hispanic or Latino (of any race) - Other Hispanic or Latino [2]
+HD02_S34,Percent; HISPANIC OR LATINO - Total population - Hispanic or Latino (of any race) - Other Hispanic or Latino [2]
+HD01_S35,Number; HISPANIC OR LATINO - Total population - Not Hispanic or Latino
+HD02_S35,Percent; HISPANIC OR LATINO - Total population - Not Hispanic or Latino
+HD01_S36,Number; RACE AND HISPANIC OR LATINO - Total population
+HD02_S36,Percent; RACE AND HISPANIC OR LATINO - Total population
+HD01_S37,Number; RACE AND HISPANIC OR LATINO - Total population - One race
+HD02_S37,Percent; RACE AND HISPANIC OR LATINO - Total population - One race
+HD01_S38,Number; RACE AND HISPANIC OR LATINO - Total population - One race - Hispanic or Latino
+HD02_S38,Percent; RACE AND HISPANIC OR LATINO - Total population - One race - Hispanic or Latino
+HD01_S39,Number; RACE AND HISPANIC OR LATINO - Total population - One race - Not Hispanic or Latino
+HD02_S39,Percent; RACE AND HISPANIC OR LATINO - Total population - One race - Not Hispanic or Latino
+HD01_S40,Number; RACE AND HISPANIC OR LATINO - Total population - Two or More Races
+HD02_S40,Percent; RACE AND HISPANIC OR LATINO - Total population - Two or More Races
+HD01_S41,Number; RACE AND HISPANIC OR LATINO - Total population - Two or More Races - Hispanic or Latino
+HD02_S41,Percent; RACE AND HISPANIC OR LATINO - Total population - Two or More Races - Hispanic or Latino
+HD01_S42,Number; RACE AND HISPANIC OR LATINO - Total population - Two or More Races - Not Hispanic or Latino
+HD02_S42,Percent; RACE AND HISPANIC OR LATINO - Total population - Two or More Races - Not Hispanic or Latino
