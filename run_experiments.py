@@ -13,31 +13,31 @@ import pandas as pd
 import numpy as np
 from  scipy import stats
 from collections import defaultdict
-from keras import backend as K
+from tensorflow.keras import backend as K
 import joblib as jl
 import itertools as it
 import matplotlib.pyplot as plt
 import warnings
-from numba import cuda
 import plotting as rlp
 import scipy.io as sio
-from tensorflow.compat.v1 import ConfigProto
-from tensorflow.compat.v1 import InteractiveSession
+import tensorflow as tf
+if float(tf.version.VERSION[:3])>=2:
+  import tensorflow.compat.v1 as tf
+  tf.disable_v2_behavior() 
+
 warnings.filterwarnings("ignore")
 
-def reset_keras(device=0):
-    cuda.select_device(device)
-    cuda.close()
-    print(gc.collect()) # if it's done something you should see a number being outputted
+def reset_keras():
+    print(gc.collect()) 
 
     K.clear_session()
-    sess = K.get_session()
-    sess.close()
+    # sess = K.get_session()
+    # sess.close()
     # use the same config as you used to create the session
     config = tf.ConfigProto()
     config.gpu_options.per_process_gpu_memory_fraction = 1
     config.gpu_options.visible_device_list = "0"
-    K.set_session(tf.Session(config=config))
+    #K.set_session(tf.Session(config=config))
 
 def set_device(gpu):
     os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID";
@@ -47,12 +47,7 @@ def init_keras(device=0):
     set_device(device)
     config = tf.ConfigProto()
     config.gpu_options.allow_growth=True
-    if device:
-        K.set_session(tf.Session(
-            config=tf.ConfigProto(intra_op_parallelism_threads = 14, inter_op_parallelism_threads = 14)))
-    else:
-        sess = tf.Session(config=config)
-        K.set_session(sess)
+
     
 if __name__ == "__main__": 
     # set it up
@@ -85,7 +80,7 @@ if __name__ == "__main__":
     file_tag = "secondorder-fixed"
     fb_minmax = [0, 3000]
 
-    init_keras(0)
+    init_keras(1)
     
     from paths_inc import *
     #
@@ -100,10 +95,12 @@ if __name__ == "__main__":
         #a = ["Mich67"]
         #methods = [method for method in methods if method[0] in a]
     
+        print('methods:',methods)
+        print('school:',school)
         ds = [sio.loadmat(method[1]) for method in methods]
-        methods = [method for d, method in zip(ds, methods) if d["A"].shape[0] <= fb_minmax[1] and d["A"].shape[0] >= fb_minmax[0] and
-                   np.max([np.sum(d["local_info"][:, 1] == 1)/len(d["local_info"][:, 1]),
-                           np.sum(d["local_info"][:, 1] == 2)/len(d["local_info"][:, 1])]) < .80]
+        #methods = [method for d, method in zip(ds, methods) if d["A"].shape[0] <= fb_minmax[1] and d["A"].shape[0] >= fb_minmax[0] and
+        #           np.max([np.sum(d["local_info"][:, 1] == 1)/len(d["local_info"][:, 1]),
+        #                   np.sum(d["local_info"][:, 1] == 2)/len(d["local_info"][:, 1])]) < .80]
         
         #a = ["MIT8", "UChicago30", "Carnegie49", "Vermont70", "Caltech36", "Yale4","Columbia2", "Dartmouth6"]
         a = [school] #["Columbia2", "Dartmouth6"]

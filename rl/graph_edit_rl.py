@@ -10,19 +10,20 @@
 #K.set_session(sess)
 import itertools as it
 import joblib as jl
-from keras import backend as K
-from keras.callbacks import Callback
-from keras.constraints import maxnorm, nonneg
-import keras.layers as kl
-import keras.models as km
-from keras.optimizers import Adam
+from tensorflow.keras import backend as K
+from tensorflow.keras.callbacks import Callback
+from tensorflow.keras.constraints import NonNeg as nonneg
+import tensorflow.keras.layers as kl
+import tensorflow.keras.models as km
+from tensorflow.keras.optimizers import Adam
 import numpy as np
 import numpy.random as npr
 from rl import graph_includes as graph_inc
-from keras.callbacks import TensorBoard
+from tensorflow.keras.callbacks import TensorBoard
 from datetime import datetime
 import time
 import copy
+from rl import model_util
 
 class ParameterSchedule(Callback):
     def __init__(self, 
@@ -169,7 +170,7 @@ class ParameterSchedule(Callback):
         if self.epoch_act>self.constraint_epoch_start_schedule[2]:
             self.temp *= self.temp_decay_factor
             K.set_value(self.temp_var, self.temp)
-        print('\n-------\nT_T temp:',self.temp,'\n-------')
+        print('\n-------\n temp:',self.temp,'\n-------')
                 
         if 'squared' in self.constraint_scheme:
             K.set_value(self.fair_loss_mu, K.get_value(self.fair_loss_mu) * self.fair_loss_mu_update_factor)
@@ -205,10 +206,6 @@ class FlowGraphEditRL():
         self.net_gs = g_s
         self.N = len(self.net_gs[0])
         self.mask = mask    
-        print('|mask dim:{},{}'.format(len(mask),len(mask[0])))
-        print('mask:',mask)
-        print('self.immunized_ids:',self.immunized_ids)
-        print('self.net_gs:',self.net_gs[0])
 
         #states
         states_fn = self.enforce_fn(self.map_defaults(config, "states fn","init_node_states"))
@@ -279,8 +276,6 @@ class FlowGraphEditRL():
                                                     self.alternate_loss,
                                                     self.get_df_data_gen(),
                                                     self.config)
-            print('@_@ param_schedule.fair_loss_mu:', self.param_schedule.fair_loss_mu)
-            print('@_@ param_schedule.edit_loss_mu:', self.param_schedule.edit_loss_mu)
 
             timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S.%f')[:-3]
             self.tbCallBack = TensorBoard(log_dir='../Graph/{}_{}_{}'.format(self.exp_name, self.method, timestamp))
@@ -355,13 +350,9 @@ class FlowGraphEditRL():
             return np.tile(a,tuple(al))
         
         R = batch_repeat(np.expand_dims(np.array(self.immunized_nodes.tolist()), axis=0)) 
-        print('R:',R.shape)
         W = batch_repeat(np.expand_dims(np.array(self.net_gs[0]),axis=(0,-1)))
-        print('W:',W.shape)
         R_mat = batch_repeat(np.expand_dims(np.diag(self.immunized_nodes), axis = (0,-1)))
-        print('R_mat:',R_mat.shape)
         A = batch_repeat(np.expand_dims(self.mask, axis=(0,-1)))
-        print('A:',A.shape)
         
         
         while True:
@@ -556,7 +547,7 @@ class FlowGraphEditRL():
 
     def get_flow_model(self,P_init):
         s = kl.Input((self.num_states,))
-        Dense_W = kl.Dense(self.num_states, use_bias=False,W_constraint=nonneg(),weights = [np.array(P_init)])
+        Dense_W = kl.Dense(self.num_states, use_bias=False,kernel_constraint=nonneg(),weights = [np.array(P_init)])
         logit = Dense_W(s)
         #P = kl.Activation('softmax')(logit)
         P = kl.Lambda(lambda z:z/K.sum(z,axis=-1,keepdims=True))(logit)
@@ -574,7 +565,7 @@ class FlowGraphEditRL():
         Dense_W(s)
         W = Dense_W.weights[0]
 
-        Dense_W_ = kl.Dense(self.num_states, use_bias=False,W_constraint=nonneg())
+        Dense_W_ = kl.Dense(self.num_states, use_bias=False, kernel_constraint=nonneg())
         Dense_W_(s)
         W_ = Dense_W_.weights[0]
 
@@ -645,11 +636,7 @@ class FlowGraphEditRL():
         R_mat = np.expand_dims(np.diag(self.immunized_nodes), axis = (0,-1))
         A = np.expand_dims(np.zeros(self.mask.shape), axis=(0,-1))
         
-        print('W Trx:',np.squeeze(W,axis=(0,-1)))
         W[W>0] = 1.
-        print('W Edge:',np.squeeze(W,axis=(0,-1)))
-        print('R:',R)
-        print('R_mat:',np.squeeze(R_mat,axis=(0,-1)))
         print('# of editable edges:',np.sum(self.mask))
         print('Budget:',self.budget)
         print('=========================================')
@@ -725,8 +712,8 @@ class FlowGraphEditRL():
             },
             optimizer=Adam(lr=self.lr),
             metrics = {
-                'value':[self.flow_loss,self.fair_loss,self.diff_bw_groups,self.mean_value],
-                'edit':[self.num_edits_exceeded]
+                'value':[model_util.get_flow_loss(self.main_obj_optimizer_p), model_util.get_fair_loss(self.config), model_util.diff_bw_groups, model_util.mean_value],
+                'edit':[model_util.get_num_edits_exceeded(self.budget)]
             }
         )
         
@@ -767,17 +754,17 @@ class FlowGraphEditRL():
             },
             optimizer=Adam(lr=self.lr),
             metrics={
-                'value': [self.flow_loss, self.fair_loss]
+                'value': [model_util.get_flow_loss(self.main_obj_optimizer_p), model_util.get_fair_loss(self.config)]
             }
         )
         return model
     
-    def num_edits_exceeded(self, y_true, y_pred):
+    def num_edits_exceeded_(self, y_true, y_pred):
         edits_exceeded = K.clip(K.mean(y_pred) - self.budget, 0 , 1e20)
         return edits_exceeded
     
     def budget_loss(self, y_true, y_pred):
-        edit_loss = self.num_edits_exceeded(y_true, y_pred)
+        edit_loss = model_util.get_num_edits_exceeded(self.budget)(y_true, y_pred)
         #edit_loss = K.clip(edit_loss, self.constraint_epsilon[1] , 1e20) - self.constraint_epsilon[1]
         
         if 'squared' in self.constraint_scheme:
@@ -788,76 +775,6 @@ class FlowGraphEditRL():
         return edit_loss * self.param_schedule.budget_loss_switch
         #return K.mean(K.clip(K.sum(y_pred, axis=(1, 2, 3)) - self.budget, 0, 1e20), axis=0)
 
-
-    def diff_bw_groups(self, y_true, y_pred):
-        N = K.int_shape(y_pred)[1]
-        group_utilities = K.mean(y_pred,axis=0)
-        mean_group_utilites = K.expand_dims(K.mean(group_utilities),axis=-1)
-        diff_from_mean = K.abs(group_utilities-mean_group_utilites)
-        diff_from_mean = K.sum(diff_from_mean)
-        print('^_^ diff_from_mean:',K.int_shape(diff_from_mean))
-        return diff_from_mean
-            
-
-    def fair_loss_1(self, y_true, y_pred):
-        N = K.int_shape(y_pred)[1]
-        
-        print('^_^ y_pred:',K.int_shape(y_pred))
-        group_utilities = K.mean(y_pred,axis=0)
-        print('^_^ group_utilities:',K.int_shape(group_utilities))
-        mean_group_utilites = K.expand_dims(K.mean(y_pred),axis=-1)
-        print('^_^ mean_group_utilites:',K.int_shape(mean_group_utilites))
-        fair_loss = K.abs(group_utilities-mean_group_utilites)
-        print('^_^ fair_loss:',K.int_shape(fair_loss))
-        
-        N = K.int_shape(y_pred)[1]
-        var_group_utilites = K.expand_dims(K.var(y_pred),axis=-1)
-        if self.fair_loss_normalize_variance:
-            variance = (K.sum(var_group_utilites)/N)**0.5
-            fair_loss = fair_loss/variance
-        
-        print('^_^ fair_loss:',K.int_shape(fair_loss))
-            
-        return K.sum(fair_loss)
-    
-    def fair_loss(self, y_true, y_pred):
-        v = y_pred
-        vgs = K.mean(v,axis=-2)
-        vg_mean = K.mean(vgs,axis=-1)
-        vgs_var = K.var(vgs,axis=-1)        
-        
-        v_var = K.var(v,axis=-2)
-        v_var_mean = K.mean(v_var,axis=-1)
-        
-        v_mean =  K.mean(v,axis=(-1,-2),keepdims=True)
-        
-        print('vgs:{},vg_mean:{}'.format(vgs,vg_mean))
-        
-        if self.config['fair_loss_error']=='mae':
-            loss = K.sum(K.abs(vg_mean-vgs))
-        elif self.config['fair_loss_error']=='mae2':
-            print('v:',K.int_shape(v))
-            print('v_mean:',K.int_shape(v_mean))
-            loss = K.abs(v_mean-v)
-            print('loss:',K.int_shape(loss))
-            loss = K.mean(loss,axis=-1)
-            print('loss:',K.int_shape(loss))
-        elif self.config['fair_loss_error']=='mae3':
-            loss = K.sum(K.abs(vg_mean-vgs)) + K.sum(K.abs(v_var_mean-v_var)) * self.config['var_coeff']
-        elif self.config['fair_loss_error']=='mape':
-            loss = K.sum(K.abs(vg_mean-vgs)/vg_mean)
-        elif self.config['fair_loss_error']=='rmape':
-            loss = K.sum(K.abs(vg_mean-vgs)/vgs)
-        elif self.config['fair_loss_error']=='smape':
-            loss = K.sum(K.abs(vg_mean-vgs)/K.abs(vg_mean+vgs))
-        elif self.config['fair_loss_error']=='zscore':
-            loss = K.sum(K.abs(vg_mean-vgs)/K.abs(vgs_var))
-        else:
-            raise Exception('Invalid selection for fair_loss_error:',self.config['fair_loss_error'])
-        
-        return loss
-
-    
     def fair_loss_spectral_norm(self, y_true, y_pred):
         fair_loss = K.max(y_pred,axis=-1)-K.min(y_pred,axis=-1)
         print('^_^ fair_loss:',K.int_shape(fair_loss))
@@ -865,7 +782,7 @@ class FlowGraphEditRL():
            
     def weighted_fair_loss(self, y_true, y_pred): 
         #fair_loss = self.fair_loss_spectral_norm(y_true, y_pred)
-        fair_loss = self.fair_loss(y_true, y_pred)
+        fair_loss = model_util.get_fair_loss(self.config)(y_true, y_pred)
         fair_loss = K.clip(fair_loss,self.constraint_epsilon[0],1e20)-self.constraint_epsilon[0]
         
         if 'squared' in self.constraint_scheme:
@@ -878,25 +795,6 @@ class FlowGraphEditRL():
         return fair_loss
         #return K.square(K.mean(y_pred[:, 0]) - K.mean(y_pred[:, 1]))
         
-    def erst_while_fair_loss(self, y_true, y_pred):
-        return K.square(K.mean(y_pred[:, 0]) - K.mean(y_pred[:, 1]))
-    
-    def erst_while_fair_loss_take_2(self, y_true, y_pred):
-        fair_loss = y_pred[:, 0] - y_pred[:, 1]
-        if 'squared' in self.constraint_scheme:
-            fair_loss = self.param_schedule.fair_loss_mu * K.square(fair_loss)
-        elif 'lagrangian_augmentation' in self.constraint_scheme:
-            fair_loss = self.param_schedule.fair_loss_mu * K.square(fair_loss) + 2 * self.param_schedule.fair_loss_lambda * K.abs(fair_loss)
-        else:
-            raise Exception('Invalid constraint_scheme:',self.constraint_scheme)
-        return fair_loss
-
-    def mean_value(self,y_true, y_pred):
-        return K.mean(y_pred)
-    
-    def flow_loss(self, y_true, y_pred):
-        return -1 * K.pow((K.mean(y_pred, axis=-1)),self.main_obj_optimizer_p)
-
     def fair_flow_loss(self, y_true, y_pred):
-        return self.param_schedule.flow_loss_switch * self.flow_loss(y_true, y_pred) + self.param_schedule.fair_loss_switch * self.weighted_fair_loss(y_true, y_pred)
+        return self.param_schedule.flow_loss_switch * model_util.get_flow_loss(self.main_obj_optimizer_p)(y_true, y_pred) + self.param_schedule.fair_loss_switch * self.weighted_fair_loss(y_true, y_pred)
 

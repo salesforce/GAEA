@@ -1,0 +1,8 @@
+__pycache__
+.project
+.pydevproject
+.settings
+rl/__pycache__
+data/__MACOSX/
+data/facebook100/
+graph_rl_results/*
