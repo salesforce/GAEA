@@ -20,25 +20,15 @@ If you use this code, data or our results in your research, please cite as appro
 ## Prerequisites
 
 ### Software
-The following non-standard dependencies exist for this repository: 
-
+Install dependencies by running
 ```
-tensorflow (1.13-1.15)
-keras
-geopandas
-networkx
-igraph
-scipy
-networkx
-numpy
-ujson
-bs4
-pandas
-shapley
-geopandas
-fiona
-haversine
-geographiclib.geodesic
+pip install -r requirements.txt
+```
+The code was tested on 
+```
+cuda 11.2
+tensorflow-gpu==2.6.0
+keras==2.6.0
 ```
 
 ### Hardware
