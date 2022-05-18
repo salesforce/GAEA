@@ -7,38 +7,27 @@ This repository contains the data and code for [Salesforce Research](https://ein
 If you use this code, data or our results in your research, please cite as appropriate:
 
 ```
-@misc{ramachandran2020gaea,
-      title={GAEA: Graph Augmentation for Equitable Access via Reinforcement Learning}, 
-      author={Govardana Sachithanandam Ramachandran and Ivan Brugere and Lav R. Varshney and Caiming Xiong},
-      year={2020},
-      eprint={2012.03900},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
+@inproceedings{ramachandran2021gaea,
+  title={GAEA: Graph Augmentation for Equitable Access via Reinforcement Learning},
+  author={Ramachandran, Govardana Sachithanandam and Brugere, Ivan and Varshney, Lav R and Xiong, Caiming},
+  booktitle={Proceedings of the 2021 AAAI/ACM Conference on AI, Ethics, and Society},
+  pages={884--894},
+  year={2021}
 }
 ```
 
 ## Prerequisites
 
 ### Software
-The following non-standard dependencies exist for this repository: 
-
+Install dependencies by running
 ```
-tensorflow (1.13-1.15)
-keras
-geopandas
-networkx
-igraph
-scipy
-networkx
-numpy
-ujson
-bs4
-pandas
-shapley
-geopandas
-fiona
-haversine
-geographiclib.geodesic
+pip install -r requirements.txt
+```
+The code was tested on 
+```
+cuda 11.2
+tensorflow-gpu==2.6.0
+keras==2.6.0
 ```
 
 ### Hardware
